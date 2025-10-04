@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <link rel="stylesheet" href="style.css">
+  <link
+    href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    /* Login button in top right corner with gradient */
+    .login-btn-corner {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn-corner:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+      transform: translateY(-2px);
+    }
+
+    /* Full screen modal overlay with dark theme */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #1a1a2e;
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    /* Close button */
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      font-size: 30px;
+      color: #fff;
+      cursor: pointer;
+      z-index: 2010;
+      transition: color 0.3s ease;
+    }
+
+    .close-modal:hover {
+      color: #667eea;
+    }
+
+    /* Dark theme container for form */
+    .modal-overlay .auth-container {
+      position: relative;
+      width: 450px;
+      background: #16213e;
+      margin: 20px;
+      border-radius: 30px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+      padding: 40px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-overlay .auth-container h1 {
+      font-size: 36px;
+      margin-bottom: 30px;
+      color: #fff;
+    }
+
+    .modal-overlay .auth-container p {
+      font-size: 14.5px;
+      margin: 15px 0;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Error message */
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #ef4444;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .success-message {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+      color: #22c55e;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    /* Form styling */
+    .modal-overlay .auth-form {
+      width: 100%;
+    }
+
+    .modal-overlay .form-box {
+      display: none;
+    }
+
+    .modal-overlay .form-box.active {
+      display: block;
+    }
+
+    .modal-overlay .input-box {
+      position: relative;
+      margin: 30px 0;
+    }
+
+    .modal-overlay .input-box input {
+      width: 100%;
+      padding: 13px 50px 13px 20px;
+      background: #0f3460;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      outline: none;
+      font-size: 16px;
+      color: #fff;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay .input-box input:focus {
+      border-color: #667eea;
+      background: #1a4d7a;
+    }
+
+    .modal-overlay .input-box input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 400;
+    }
+
+    .modal-overlay .input-box i {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .modal-overlay .forgot-link {
+      margin: -15px 0 15px;
+      text-align: left;
+    }
+
+    .modal-overlay .forgot-link a {
+      font-size: 14.5px;
+      color: #667eea;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .modal-overlay .forgot-link a:hover {
+      color: #764ba2;
+    }
+
+    .modal-overlay .btn {
+      width: 100%;
+      height: 48px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #fff;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay .btn:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .modal-overlay .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal-overlay .social-icons {
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .modal-overlay .social-icons a {
+      display: inline-flex;
+      padding: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      font-size: 24px;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 8px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay .social-icons a:hover {
+      border-color: #667eea;
+      color: #667eea;
+      transform: translateY(-3px);
+    }
+
+    .modal-overlay .toggle-text {
+      margin-top: 20px;
+      font-size: 14.5px;
+    }
+
+    .modal-overlay .toggle-text a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .modal-overlay .toggle-text a:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+
+    /* Weather display styling */
+    #result {
+      margin-top: 30px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 20px;
+    }
+
+    #result h2 {
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #fff;
+    }
+
+    #result h3 {
+      color: white;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .weather-grid {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .weather-box {
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      min-width: 150px;
+      flex: 1;
+      color: white;
+    }
+
+    .weather-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .weather-box .icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .weather-box .label {
+      font-size: 14px;
+      margin-bottom: 8px;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    .weather-box .value {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    /* Color themes for each box */
+    .weather-box.temperature {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .weather-box.wind {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .weather-box.humidity {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    .weather-box.conditions {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .weather-box.rain {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Hourly forecast styling */
+    .hourly-forecast {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      padding: 20px 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+
+    .hourly-forecast::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .hourly-forecast::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .hourly-forecast::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+    }
+
+    .hourly-item {
+      min-width: 100px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 20px 15px;
+      text-align: center;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .hourly-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+    }
+
+    .hourly-time {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      opacity: 0.9;
+    }
+
+    .hourly-icon {
+      font-size: 32px;
+      margin: 10px 0;
+    }
+
+    .hourly-temp {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+
+    .hourly-rain {
+      font-size: 12px;
+      color: #4facfe;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+    /* Daily forecast styling - HORIZONTAL */
+    .daily-forecast {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      padding: 20px 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+
+    .daily-forecast::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .daily-forecast::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .daily-forecast::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+    }
+
+    .daily-item {
+      min-width: 140px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .daily-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .daily-day {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .daily-date {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-bottom: 15px;
+    }
+
+    .daily-icon {
+      font-size: 40px;
+      margin: 15px 0;
+    }
+
+    .daily-temps {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 15px 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .daily-max {
+      color: #ff6b6b;
+    }
+
+    .daily-min {
+      color: #4facfe;
+    }
+
+    .daily-condition {
+      font-size: 13px;
+      opacity: 0.9;
+      margin: 10px 0;
+      text-transform: capitalize;
+    }
+
+    .daily-rain {
+      font-size: 12px;
+      color: #4facfe;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    @media screen and (max-width: 768px) {
+      .weather-grid {
+        flex-wrap: wrap;
+      }
+
+      .weather-box {
+        min-width: calc(50% - 10px);
+      }
+    }
+
+    @media screen and (max-width: 500px) {
+      .modal-overlay .auth-container {
+        width: 90%;
+        padding: 20px;
+      }
+
+      .weather-box {
+        min-width: 100%;
+      }
+
+      .daily-item {
+        min-width: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login button in top right corner -->
+  <button class="login-btn-corner" id="openModal">Login</button>
+
+  <h1>🌤️ Will it rain on my parade</h1>
+
+  <!-- Glowing Search Bar -->
+  <div class="grid"></div>
+  <div id="poda" role="search">
+    <div class="glow" aria-hidden="true"></div>
+    <div class="darkBorderBg" aria-hidden="true"></div>
+    <div class="darkBorderBg" aria-hidden="true"></div>
+    <div class="darkBorderBg" aria-hidden="true"></div>
+    <div class="white" aria-hidden="true"></div>
+    <div class="border" aria-hidden="true"></div>
+    <div class="filterBorder" aria-hidden="true"></div>
+
+    <div id="main">
+      <svg id="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="8" stroke="#9e9ea7" stroke-width="2"/>
+        <path d="M21 21L16.65 16.65" stroke="#9e9ea7" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+
+      <div id="input-mask"></div>
+      <div id="pink-mask"></div>
+
+      <label for="search-input" class="visually-hidden">Search</label>
+      <input
+        id="search-input"
+        placeholder="Search city..."
+        type="text"
+        name="text"
+        class="input"
+        autocomplete="off"
+      />
+
+      <button id="filter-icon" aria-label="Filter">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M0 2h16M4 8h8M6 14h4" stroke="#9e9ea7" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="result"></div>
+
+  <!-- Full Screen Modal for Login/Signup with Dark Theme -->
+  <div class="modal-overlay" id="loginModal">
+    <button class="close-modal" id="closeModal">&times;</button>
+    
+    <div class="auth-container">
+      <!-- Login Form -->
+      <div class="form-box login active">
+        <form id="loginForm" class="auth-form">
+          <h1>Login</h1>
+          <div class="error-message" id="loginError"></div>
+          <div class="input-box">
+            <input type="text" id="loginUsername" placeholder="Username" required />
+            <i class="bx bxs-user"></i>
+          </div>
+          <div class="input-box">
+            <input type="password" id="loginPassword" placeholder="Password" required />
+            <i class="bx bxs-lock-alt"></i>
+          </div>
+          <div class="forgot-link">
+            <a href="#">Forgot Password?</a>
+          </div>
+          <button type="submit" class="btn">Login</button>
+          <p>or login with social platforms</p>
+          <div class="social-icons">
+            <a href="#"><i class="bx bxl-google"></i></a>
+            <a href="#"><i class="bx bxl-facebook"></i></a>
+            <a href="#"><i class="bx bxl-github"></i></a>
+            <a href="#"><i class="bx bxl-linkedin"></i></a>
+          </div>
+          <div class="toggle-text">
+            <p>Don't have an account? <a id="showRegister">Register</a></p>
+          </div>
+        </form>
+      </div>
+
+      <!-- Registration Form -->
+      <div class="form-box register">
+        <form id="registerForm" class="auth-form">
+          <h1>Registration</h1>
+          <div class="error-message" id="registerError"></div>
+          <div class="success-message" id="registerSuccess"></div>
+          <div class="input-box">
+            <input type="text" id="registerUsername" placeholder="Username" required minlength="3" />
+            <i class="bx bxs-user"></i>
+          </div>
+          <div class="input-box">
+            <input type="email" id="registerEmail" placeholder="Email" required />
+            <i class="bx bxs-envelope"></i>
+          </div>
+          <div class="input-box">
+            <input type="password" id="registerPassword" placeholder="Password" required minlength="6" />
+            <i class="bx bxs-lock-alt"></i>
+          </div>
+          <button type="submit" class="btn">Register</button>
+          <p>or register with social platforms</p>
+          <div class="social-icons">
+            <a href="#"><i class="bx bxl-google"></i></a>
+            <a href="#"><i class="bx bxl-facebook"></i></a>
+            <a href="#"><i class="bx bxl-github"></i></a>
+            <a href="#"><i class="bx bxl-linkedin"></i></a>
+          </div>
+          <div class="toggle-text">
+            <p>Already have an account? <a id="showLogin">Login</a></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check if user is logged in
+    let authToken = localStorage.getItem('authToken');
+    let currentUser = localStorage.getItem('currentUser');
+
+    if (authToken && currentUser) {
+      document.getElementById('openModal').textContent = `Hi, ${currentUser}`;
+    }
+
+    // Registration handler
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('registerUsername').value.trim();
+      const email = document.getElementById('registerEmail').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      
+      const errorDiv = document.getElementById('registerError');
+      const successDiv = document.getElementById('registerSuccess');
+      errorDiv.classList.remove('show');
+      successDiv.classList.remove('show');
+
+      try {
+        const response = await fetch('http://localhost:3000/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          successDiv.textContent = 'Registration successful! Redirecting to login...';
+          successDiv.classList.add('show');
+          
+          document.getElementById('registerForm').reset();
+          
+          setTimeout(() => {
+            document.querySelector('.form-box.register').classList.remove('active');
+            document.querySelector('.form-box.login').classList.add('active');
+            successDiv.classList.remove('show');
+          }, 2000);
+        } else {
+          errorDiv.textContent = data.error || 'Registration failed';
+          errorDiv.classList.add('show');
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Network error. Please try again.';
+        errorDiv.classList.add('show');
+      }
+    });
+
+    // Login handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      
+      const errorDiv = document.getElementById('loginError');
+      errorDiv.classList.remove('show');
+
+      try {
+        const response = await fetch('http://localhost:3000/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('currentUser', data.user.username);
+          
+          document.getElementById('openModal').textContent = `Hi, ${data.user.username}`;
+          document.getElementById('loginModal').classList.remove('active');
+          document.getElementById('loginForm').reset();
+        } else {
+          errorDiv.textContent = data.error || 'Login failed';
+          errorDiv.classList.add('show');
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Network error. Please try again.';
+        errorDiv.classList.add('show');
+      }
+    });
+
+    // Weather functionality with hourly and daily forecast
+    async function getWeather() {
+      const city = document.getElementById("search-input").value.trim();
+      if (!city) {
+        document.getElementById("result").innerText = "❌ ERROR: Please enter a city name.";
+        return;
+      }
+
+      try {
+        // Fetch current weather
+        const currentRes = await fetch(`/weather/${city}`);
+        const currentData = await currentRes.json();
+
+        if (currentData.error) {
+          document.getElementById("result").innerText = "❌ ERROR: " + currentData.error;
+          return;
+        }
+
+        // Fetch hourly forecast
+        const forecastRes = await fetch(`/forecast/${city}`);
+        const forecastData = await forecastRes.json();
+
+        // Fetch daily forecast
+        const dailyRes = await fetch(`/forecast/daily/${city}`);
+        const dailyData = await dailyRes.json();
+
+        // Calculate rain probability
+        const rainProbability = calculateRainProbability(currentData);
+        
+        // Display current weather
+        let htmlContent = `
+          <h2>${currentData.name}</h2>
+          <div class="weather-grid">
+            <div class="weather-box temperature">
+              <div class="icon">🌡️</div>
+              <div class="label">Temperature</div>
+              <div class="value">${currentData.main.temp}°C</div>
+            </div>
+            <div class="weather-box wind">
+              <div class="icon">💨</div>
+              <div class="label">Wind Speed</div>
+              <div class="value">${currentData.wind.speed} m/s</div>
+            </div>
+            <div class="weather-box humidity">
+              <div class="icon">💧</div>
+              <div class="label">Humidity</div>
+              <div class="value">${currentData.main.humidity}%</div>
+            </div>
+            <div class="weather-box conditions">
+              <div class="icon">⛅</div>
+              <div class="label">Conditions</div>
+              <div class="value">${currentData.weather[0].description}</div>
+            </div>
+            <div class="weather-box rain">
+              <div class="icon">🌧️</div>
+              <div class="label">Chance of Rain</div>
+              <div class="value">${rainProbability}</div>
+            </div>
+          </div>
+        `;
+
+        // Add hourly forecast section
+        if (forecastData.list) {
+          htmlContent += `
+            <div style="margin-top: 40px;">
+              <h3>📅 Hourly Forecast (Next 24 Hours)</h3>
+              <div class="hourly-forecast">
+          `;
+
+          forecastData.list.forEach((item) => {
+            const time = new Date(item.dt * 1000);
+            const hours = time.getHours();
+            const timeString = hours > 12 ? `${hours - 12}PM` : (hours === 0 ? '12AM' : `${hours}AM`);
+            const temp = Math.round(item.main.temp);
+            const icon = getWeatherEmoji(item.weather[0].main);
+            const pop = Math.round((item.pop || 0) * 100);
+
+            htmlContent += `
+              <div class="hourly-item">
+                <div class="hourly-time">${timeString}</div>
+                <div class="hourly-icon">${icon}</div>
+                <div class="hourly-temp">${temp}°C</div>
+                <div class="hourly-rain">${pop}%</div>
+              </div>
+            `;
+          });
+
+          htmlContent += `
+              </div>
+            </div>
+          `;
+        }
+
+        // Add 7-day forecast section
+        if (dailyData.list) {
+          htmlContent += `
+            <div style="margin-top: 40px;">
+              <h3>📆 7-Day Forecast</h3>
+              <div class="daily-forecast">
+          `;
+
+          // Group forecast by day
+          const dailyForecasts = processDailyForecast(dailyData.list);
+
+          dailyForecasts.forEach((day) => {
+            htmlContent += `
+              <div class="daily-item">
+                <div class="daily-day">${day.dayName}</div>
+                <div class="daily-date">${day.date}</div>
+                <div class="daily-icon">${day.icon}</div>
+                <div class="daily-temps">
+                  <span class="daily-max">${day.maxTemp}°</span>
+                  <span class="daily-min">${day.minTemp}°</span>
+                </div>
+                <div class="daily-condition">${day.condition}</div>
+                <div class="daily-rain">💧 ${day.rainChance}%</div>
+              </div>
+            `;
+          });
+
+          htmlContent += `
+              </div>
+            </div>
+          `;
+        }
+
+        document.getElementById("result").innerHTML = htmlContent;
+      } catch (error) {
+        document.getElementById("result").innerText = "❌ ERROR: Failed to fetch weather data.";
+      }
+    }
+
+    // Process daily forecast data
+    function processDailyForecast(forecastList) {
+      const dailyData = {};
+      
+      forecastList.forEach(item => {
+        const date = new Date(item.dt * 1000);
+        const dateKey = date.toDateString();
+        
+        if (!dailyData[dateKey]) {
+          dailyData[dateKey] = {
+            date: date,
+            temps: [],
+            conditions: [],
+            rainProbs: [],
+            weatherMain: item.weather[0].main
+          };
+        }
+        
+        dailyData[dateKey].temps.push(item.main.temp);
+        dailyData[dateKey].conditions.push(item.weather[0].description);
+        dailyData[dateKey].rainProbs.push(item.pop || 0);
+      });
+
+      const days = Object.keys(dailyData).slice(0, 7);
+      
+      return days.map(dateKey => {
+        const data = dailyData[dateKey];
+        const maxTemp = Math.round(Math.max(...data.temps));
+        const minTemp = Math.round(Math.min(...data.temps));
+        const avgRainProb = Math.round((data.rainProbs.reduce((a, b) => a + b, 0) / data.rainProbs.length) * 100);
+        
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        const date = data.date;
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        let dayName;
+        if (date.toDateString() === today.toDateString()) {
+          dayName = 'Today';
+        } else if (date.toDateString() === tomorrow.toDateString()) {
+          dayName = 'Tomorrow';
+        } else {
+          dayName = dayNames[date.getDay()];
+        }
+        
+        return {
+          dayName: dayName,
+          date: `${monthNames[date.getMonth()]} ${date.getDate()}`,
+          icon: getWeatherEmoji(data.weatherMain),
+          maxTemp: maxTemp,
+          minTemp: minTemp,
+          condition: data.conditions[0],
+          rainChance: avgRainProb
+        };
+      });
+    }
+
+    // Get weather emoji based on condition
+    function getWeatherEmoji(condition) {
+      const weatherEmojis = {
+        'Clear': '☀️',
+        'Clouds': '☁️',
+        'Rain': '🌧️',
+        'Drizzle': '🌦️',
+        'Thunderstorm': '⛈️',
+        'Snow': '❄️',
+        'Mist': '🌫️',
+        'Fog': '🌫️',
+        'Haze': '🌫️'
+      };
+      return weatherEmojis[condition] || '🌤️';
+    }
+
+    // Function to calculate rain probability
+    function calculateRainProbability(data) {
+      let probability = 0;
+      
+      const weatherMain = data.weather[0].main.toLowerCase();
+      const humidity = data.main.humidity;
+      const clouds = data.clouds.all;
+      
+      if (weatherMain.includes('rain')) {
+        probability = 80;
+      } else if (weatherMain.includes('drizzle')) {
+        probability = 60;
+      } else if (weatherMain.includes('thunderstorm')) {
+        probability = 90;
+      } else if (weatherMain.includes('cloud')) {
+        if (clouds > 80 && humidity > 70) {
+          probability = 50;
+        } else if (clouds > 60 && humidity > 60) {
+          probability = 30;
+        } else if (clouds > 40) {
+          probability = 15;
+        } else {
+          probability = 5;
+        }
+      } else if (weatherMain.includes('clear')) {
+        probability = 0;
+      } else {
+        probability = 10;
+      }
+      
+      return `${probability}%`;
+    }
+
+    document.getElementById("search-input").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        getWeather();
+      }
+    });
+
+    document.getElementById("search-icon").addEventListener("click", getWeather);
+
+    // Modal functionality
+    const modal = document.getElementById('loginModal');
+    const openBtn = document.getElementById('openModal');
+    const closeBtn = document.getElementById('closeModal');
+    const loginForm = document.querySelector('.form-box.login');
+    const registerForm = document.querySelector('.form-box.register');
+    const showRegisterBtn = document.getElementById('showRegister');
+    const showLoginBtn = document.getElementById('showLogin');
+
+    openBtn.addEventListener('click', () => {
+      modal.classList.add('active');
+      loginForm.classList.add('active');
+      registerForm.classList.remove('active');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    showRegisterBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginForm.classList.remove('active');
+      registerForm.classList.add('active');
+      document.getElementById('loginError').classList.remove('show');
+      document.getElementById('registerError').classList.remove('show');
+    });
+
+    showLoginBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      registerForm.classList.remove('active');
+      loginForm.classList.add('active');
+      document.getElementById('loginError').classList.remove('show');
+      document.getElementById('registerError').classList.remove('show');
+    });
+  </script>
+</body>
+</html>
