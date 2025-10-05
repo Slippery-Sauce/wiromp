@@ -9,7 +9,7 @@ import cors from "cors";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.WEATHER_API_KEY;
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/wiromp";
 const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key_change_this";
@@ -189,6 +189,18 @@ app.get("/forecast/daily/:city", async (req, res) => {
     res.json(response.data);
   } catch (err) {
     res.status(400).json({ error: "City not found" });
+  }
+});
+
+// Air Quality endpoint
+app.get("/airquality/:lat/:lon", async (req, res) => {
+  const { lat, lon } = req.params;
+  try {
+    const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (err) {
+    res.status(400).json({ error: "Unable to fetch air quality data" });
   }
 });
 

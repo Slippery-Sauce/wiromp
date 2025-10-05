@@ -500,6 +500,126 @@
       margin-top: 10px;
     }
 
+    /* Air Quality Index styling */
+    .aqi-section {
+      margin-top: 40px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+    }
+
+    .aqi-title {
+      color: white;
+      font-size: 24px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .aqi-container {
+      position: relative;
+      margin-top: 20px;
+    }
+
+    .aqi-bar {
+      height: 40px;
+      background: linear-gradient(to right, 
+        #00e400 0%, #00e400 20%,
+        #ffff00 20%, #ffff00 40%,
+        #ff7e00 40%, #ff7e00 60%,
+        #ff0000 60%, #ff0000 80%,
+        #8f3f97 80%, #8f3f97 100%
+      );
+      border-radius: 20px;
+      position: relative;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .aqi-marker {
+      position: absolute;
+      top: -10px;
+      transform: translateX(-50%);
+      transition: left 0.5s ease;
+    }
+
+    .aqi-marker-dot {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border: 3px solid #333;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .aqi-marker-line {
+      width: 2px;
+      height: 60px;
+      background: white;
+      margin: 0 auto;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .aqi-value {
+      margin-top: 5px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      white-space: nowrap;
+    }
+
+    .aqi-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .aqi-label {
+      text-align: center;
+      flex: 1;
+    }
+
+    .aqi-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .aqi-detail-item {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .aqi-detail-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .aqi-detail-value {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .aqi-detail-unit {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
     @media screen and (max-width: 768px) {
       .weather-grid {
         flex-wrap: wrap;
@@ -522,6 +642,10 @@
 
       .daily-item {
         min-width: 120px;
+      }
+
+      .aqi-details {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
@@ -640,7 +764,7 @@
       </div>
     </div>
   </div>
-
+  
   <script>
     // Check if user is logged in
     let authToken = localStorage.getItem('authToken');
@@ -733,7 +857,7 @@
       }
     });
 
-    // Weather functionality with hourly and daily forecast
+    // Weather functionality with hourly, daily forecast, and AQI
     async function getWeather() {
       const city = document.getElementById("search-input").value.trim();
       if (!city) {
@@ -751,6 +875,10 @@
           return;
         }
 
+        // Get coordinates for air quality
+        const lat = currentData.coord.lat;
+        const lon = currentData.coord.lon;
+
         // Fetch hourly forecast
         const forecastRes = await fetch(`/forecast/${city}`);
         const forecastData = await forecastRes.json();
@@ -758,6 +886,10 @@
         // Fetch daily forecast
         const dailyRes = await fetch(`/forecast/daily/${city}`);
         const dailyData = await dailyRes.json();
+
+        // Fetch air quality
+        const aqiRes = await fetch(`/airquality/${lat}/${lon}`);
+        const aqiData = await aqiRes.json();
 
         // Calculate rain probability
         const rainProbability = calculateRainProbability(currentData);
@@ -834,7 +966,6 @@
               <div class="daily-forecast">
           `;
 
-          // Group forecast by day
           const dailyForecasts = processDailyForecast(dailyData.list);
 
           dailyForecasts.forEach((day) => {
@@ -859,10 +990,88 @@
           `;
         }
 
+        // Add Air Quality Index section
+        if (aqiData.list && aqiData.list[0]) {
+          const aqi = aqiData.list[0].main.aqi;
+          const components = aqiData.list[0].components;
+          
+          const aqiInfo = getAQIInfo(aqi);
+          const aqiPosition = ((aqi - 1) / 4) * 100; // Position marker (1-5 scale to 0-100%)
+
+          htmlContent += `
+            <div class="aqi-section">
+              <div class="aqi-title">
+                <span>🌫️ Air Quality Index</span>
+              </div>
+              <div class="aqi-container">
+                <div class="aqi-bar">
+                  <div class="aqi-marker" style="left: ${aqiPosition}%">
+                    <div class="aqi-marker-dot"></div>
+                    <div class="aqi-marker-line"></div>
+                    <div class="aqi-value">${aqiInfo.label} (${aqi})</div>
+                  </div>
+                </div>
+                <div class="aqi-labels">
+                  <div class="aqi-label">Good</div>
+                  <div class="aqi-label">Fair</div>
+                  <div class="aqi-label">Moderate</div>
+                  <div class="aqi-label">Poor</div>
+                  <div class="aqi-label">Very Poor</div>
+                </div>
+              </div>
+              <div class="aqi-details">
+                <div class="aqi-detail-item">
+                  <div class="aqi-detail-label">PM2.5</div>
+                  <div class="aqi-detail-value">${components.pm2_5.toFixed(1)}</div>
+                  <div class="aqi-detail-unit">μg/m³</div>
+                </div>
+                <div class="aqi-detail-item">
+                  <div class="aqi-detail-label">PM10</div>
+                  <div class="aqi-detail-value">${components.pm10.toFixed(1)}</div>
+                  <div class="aqi-detail-unit">μg/m³</div>
+                </div>
+                <div class="aqi-detail-item">
+                  <div class="aqi-detail-label">Ozone (O₃)</div>
+                  <div class="aqi-detail-value">${components.o3.toFixed(1)}</div>
+                  <div class="aqi-detail-unit">μg/m³</div>
+                </div>
+                <div class="aqi-detail-item">
+                  <div class="aqi-detail-label">NO₂</div>
+                  <div class="aqi-detail-value">${components.no2.toFixed(1)}</div>
+                  <div class="aqi-detail-unit">μg/m³</div>
+                </div>
+                <div class="aqi-detail-item">
+                  <div class="aqi-detail-label">SO₂</div>
+                  <div class="aqi-detail-value">${components.so2.toFixed(1)}</div>
+                  <div class="aqi-detail-unit">μg/m³</div>
+                </div>
+                <div class="aqi-detail-item">
+                  <div class="aqi-detail-label">CO</div>
+                  <div class="aqi-detail-value">${(components.co / 1000).toFixed(2)}</div>
+                  <div class="aqi-detail-unit">mg/m³</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
         document.getElementById("result").innerHTML = htmlContent;
       } catch (error) {
+        console.error("Weather fetch error:", error);
         document.getElementById("result").innerText = "❌ ERROR: Failed to fetch weather data.";
       }
+    }
+
+    // Get AQI information
+    function getAQIInfo(aqi) {
+      const aqiLevels = {
+        1: { label: 'Good', color: '#00e400' },
+        2: { label: 'Fair', color: '#ffff00' },
+        3: { label: 'Moderate', color: '#ff7e00' },
+        4: { label: 'Poor', color: '#ff0000' },
+        5: { label: 'Very Poor', color: '#8f3f97' }
+      };
+      return aqiLevels[aqi] || aqiLevels[1];
     }
 
     // Process daily forecast data
