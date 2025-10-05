@@ -500,7 +500,7 @@
       margin-top: 10px;
     }
 
-    /* Air Quality Index styling */
+       /* Air Quality Index styling */
     .aqi-section {
       margin-top: 40px;
       padding: 30px;
@@ -522,6 +522,7 @@
     .aqi-container {
       position: relative;
       margin-top: 20px;
+      padding-top: 20px;
     }
 
     .aqi-bar {
@@ -540,30 +541,25 @@
 
     .aqi-marker {
       position: absolute;
-      top: -10px;
+      bottom: 50px;
       transform: translateX(-50%);
       transition: left 0.5s ease;
     }
 
     .aqi-marker-dot {
-      width: 20px;
-      height: 20px;
-      background: white;
-      border: 3px solid #333;
-      border-radius: 50%;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      display: none;
     }
 
     .aqi-marker-line {
       width: 2px;
-      height: 60px;
+      height: 40px;
       background: white;
       margin: 0 auto;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
 
     .aqi-value {
-      margin-top: 5px;
+      margin-bottom: 5px;
       background: rgba(0, 0, 0, 0.8);
       color: white;
       padding: 8px 16px;
@@ -588,30 +584,59 @@
     }
 
     .aqi-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      display: flex;
       gap: 15px;
       margin-top: 25px;
+      overflow-x: auto;
+      padding: 20px 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+
+    .aqi-details::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .aqi-details::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .aqi-details::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
     }
 
     .aqi-detail-item {
+      min-width: 140px;
+      flex-shrink: 0;
       background: rgba(255, 255, 255, 0.1);
-      padding: 15px;
-      border-radius: 12px;
+      padding: 20px 15px;
+      border-radius: 15px;
       text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .aqi-detail-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     }
 
     .aqi-detail-label {
       color: rgba(255, 255, 255, 0.7);
-      font-size: 12px;
-      margin-bottom: 8px;
+      font-size: 13px;
+      margin-bottom: 10px;
+      font-weight: 600;
     }
 
     .aqi-detail-value {
       color: white;
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 700;
+      margin: 8px 0;
     }
 
     .aqi-detail-unit {
@@ -620,34 +645,12 @@
       margin-top: 4px;
     }
 
-    @media screen and (max-width: 768px) {
-      .weather-grid {
-        flex-wrap: wrap;
-      }
-
-      .weather-box {
-        min-width: calc(50% - 10px);
-      }
-    }
-
     @media screen and (max-width: 500px) {
-      .modal-overlay .auth-container {
-        width: 90%;
-        padding: 20px;
-      }
-
-      .weather-box {
-        min-width: 100%;
-      }
-
-      .daily-item {
+      .aqi-detail-item {
         min-width: 120px;
       }
-
-      .aqi-details {
-        grid-template-columns: repeat(2, 1fr);
-      }
     }
+
   </style>
 </head>
 <body>
