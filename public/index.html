@@ -218,6 +218,27 @@
       cursor: not-allowed;
     }
 
+    .modal-overlay .guest-btn {
+      width: 100%;
+      height: 48px;
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 600;
+      margin-top: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay .guest-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+      transform: translateY(-2px);
+    }
+
     .modal-overlay .social-icons {
       display: flex;
       justify-content: center;
@@ -500,7 +521,7 @@
       margin-top: 10px;
     }
 
-       /* Air Quality Index styling */
+    /* Air Quality Index styling */
     .aqi-section {
       margin-top: 40px;
       padding: 30px;
@@ -645,14 +666,37 @@
       margin-top: 4px;
     }
 
+    @media screen and (max-width: 768px) {
+      .weather-grid {
+        flex-wrap: wrap;
+      }
+
+      .weather-box {
+        min-width: calc(50% - 10px);
+      }
+    }
+
     @media screen and (max-width: 500px) {
+      .modal-overlay .auth-container {
+        width: 90%;
+        padding: 20px;
+      }
+
+      .weather-box {
+        min-width: 100%;
+      }
+
+      .daily-item {
+        min-width: 120px;
+      }
+
       .aqi-detail-item {
         min-width: 120px;
       }
     }
-
   </style>
 </head>
+
 <body>
   <!-- Login button in top right corner -->
   <button class="login-btn-corner" id="openModal">Login</button>
@@ -721,6 +765,7 @@
             <a href="#">Forgot Password?</a>
           </div>
           <button type="submit" class="btn">Login</button>
+          <button type="button" class="guest-btn" id="continueAsGuest">Continue Without Account</button>
           <p>or login with social platforms</p>
           <div class="social-icons">
             <a href="#"><i class="bx bxl-google"></i></a>
@@ -753,6 +798,7 @@
             <i class="bx bxs-lock-alt"></i>
           </div>
           <button type="submit" class="btn">Register</button>
+          <button type="button" class="guest-btn" id="continueAsGuestRegister">Continue Without Account</button>
           <p>or register with social platforms</p>
           <div class="social-icons">
             <a href="#"><i class="bx bxl-google"></i></a>
@@ -767,8 +813,8 @@
       </div>
     </div>
   </div>
-  
-  <script>
+
+    <script>
     // Check if user is logged in
     let authToken = localStorage.getItem('authToken');
     let currentUser = localStorage.getItem('currentUser');
@@ -860,6 +906,17 @@
       }
     });
 
+    // Guest mode handlers
+    document.getElementById('continueAsGuest').addEventListener('click', () => {
+      document.getElementById('loginModal').classList.remove('active');
+      document.getElementById('openModal').textContent = 'Login';
+    });
+
+    document.getElementById('continueAsGuestRegister').addEventListener('click', () => {
+      document.getElementById('loginModal').classList.remove('active');
+      document.getElementById('openModal').textContent = 'Login';
+    });
+
     // Weather functionality with hourly, daily forecast, and AQI
     async function getWeather() {
       const city = document.getElementById("search-input").value.trim();
@@ -869,7 +926,6 @@
       }
 
       try {
-        // Fetch current weather
         const currentRes = await fetch(`/weather/${city}`);
         const currentData = await currentRes.json();
 
@@ -878,26 +934,20 @@
           return;
         }
 
-        // Get coordinates for air quality
         const lat = currentData.coord.lat;
         const lon = currentData.coord.lon;
 
-        // Fetch hourly forecast
         const forecastRes = await fetch(`/forecast/${city}`);
         const forecastData = await forecastRes.json();
 
-        // Fetch daily forecast
         const dailyRes = await fetch(`/forecast/daily/${city}`);
         const dailyData = await dailyRes.json();
 
-        // Fetch air quality
         const aqiRes = await fetch(`/airquality/${lat}/${lon}`);
         const aqiData = await aqiRes.json();
 
-        // Calculate rain probability
         const rainProbability = calculateRainProbability(currentData);
         
-        // Display current weather
         let htmlContent = `
           <h2>${currentData.name}</h2>
           <div class="weather-grid">
@@ -929,7 +979,6 @@
           </div>
         `;
 
-        // Add hourly forecast section
         if (forecastData.list) {
           htmlContent += `
             <div style="margin-top: 40px;">
@@ -961,7 +1010,6 @@
           `;
         }
 
-        // Add 7-day forecast section
         if (dailyData.list) {
           htmlContent += `
             <div style="margin-top: 40px;">
@@ -993,13 +1041,12 @@
           `;
         }
 
-        // Add Air Quality Index section
         if (aqiData.list && aqiData.list[0]) {
           const aqi = aqiData.list[0].main.aqi;
           const components = aqiData.list[0].components;
           
           const aqiInfo = getAQIInfo(aqi);
-          const aqiPosition = ((aqi - 1) / 4) * 100; // Position marker (1-5 scale to 0-100%)
+          const aqiPosition = ((aqi - 1) / 4) * 100;
 
           htmlContent += `
             <div class="aqi-section">
@@ -1065,7 +1112,6 @@
       }
     }
 
-    // Get AQI information
     function getAQIInfo(aqi) {
       const aqiLevels = {
         1: { label: 'Good', color: '#00e400' },
@@ -1077,7 +1123,6 @@
       return aqiLevels[aqi] || aqiLevels[1];
     }
 
-    // Process daily forecast data
     function processDailyForecast(forecastList) {
       const dailyData = {};
       
@@ -1137,7 +1182,6 @@
       });
     }
 
-    // Get weather emoji based on condition
     function getWeatherEmoji(condition) {
       const weatherEmojis = {
         'Clear': '☀️',
@@ -1153,7 +1197,6 @@
       return weatherEmojis[condition] || '🌤️';
     }
 
-    // Function to calculate rain probability
     function calculateRainProbability(data) {
       let probability = 0;
       
@@ -1227,6 +1270,20 @@
       loginForm.classList.add('active');
       document.getElementById('loginError').classList.remove('show');
       document.getElementById('registerError').classList.remove('show');
+    });
+
+    // Auto-open login modal on first visit (if not logged in)
+    window.addEventListener('DOMContentLoaded', () => {
+      const authToken = localStorage.getItem('authToken');
+      const currentUser = localStorage.getItem('currentUser');
+      
+      if (!authToken || !currentUser) {
+        setTimeout(() => {
+          modal.classList.add('active');
+          loginForm.classList.add('active');
+          registerForm.classList.remove('active');
+        }, 500);
+      }
     });
   </script>
 </body>
