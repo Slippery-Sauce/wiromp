@@ -521,7 +521,7 @@
       margin-top: 10px;
     }
 
-    /* Air Quality Index styling */
+        /* Air Quality Index styling */
     .aqi-section {
       margin-top: 40px;
       padding: 30px;
@@ -543,7 +543,7 @@
     .aqi-container {
       position: relative;
       margin-top: 20px;
-      padding-top: 20px;
+      padding-top: 60px;
     }
 
     .aqi-bar {
@@ -563,6 +563,7 @@
     .aqi-marker {
       position: absolute;
       bottom: 50px;
+      left: 0;
       transform: translateX(-50%);
       transition: left 0.5s ease;
     }
@@ -588,6 +589,9 @@
       font-weight: 700;
       font-size: 16px;
       white-space: nowrap;
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .aqi-labels {
@@ -666,6 +670,7 @@
       margin-top: 4px;
     }
 
+    
     @media screen and (max-width: 768px) {
       .weather-grid {
         flex-wrap: wrap;
@@ -860,7 +865,7 @@
   </div>
 
     <script>
-    // Check if user is logged in
+        // Check if user is logged in
     let authToken = localStorage.getItem('authToken');
     let currentUser = localStorage.getItem('currentUser');
 
@@ -962,8 +967,7 @@
       document.getElementById('openModal').textContent = 'Login';
     });
 
-    // Weather functionality with hourly, daily forecast, and AQI
-        // Weather functionality with hourly, daily forecast, AQI, and loading state
+    // Weather functionality with hourly, daily forecast, AQI, and loading state
     async function getWeather() {
       const city = document.getElementById("search-input").value.trim();
       if (!city) {
@@ -1100,7 +1104,7 @@
           const components = aqiData.list[0].components;
           
           const aqiInfo = getAQIInfo(aqi);
-          const aqiPosition = ((aqi - 1) / 4) * 100;
+          const aqiPosition = 10 + ((aqi - 1) / 4) * 80; // Fixed positioning
 
           htmlContent += `
             <div class="aqi-section">
@@ -1165,7 +1169,6 @@
         document.getElementById("result").innerText = "❌ ERROR: Failed to fetch weather data.";
       }
     }
-
 
     function getAQIInfo(aqi) {
       const aqiLevels = {
@@ -1340,6 +1343,7 @@
         }, 500);
       }
     });
+aqi-section
   </script>
 </body>
 </html>
