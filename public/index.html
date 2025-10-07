@@ -543,7 +543,7 @@
     .aqi-container {
       position: relative;
       margin-top: 20px;
-      padding-top: 60px;
+      padding-bottom: 80px;
     }
 
     .aqi-bar {
@@ -562,7 +562,7 @@
 
     .aqi-marker {
       position: absolute;
-      bottom: 50px;
+      top: 50px;
       left: 0;
       transform: translateX(-50%);
       transition: left 0.5s ease;
@@ -576,12 +576,11 @@
       width: 2px;
       height: 40px;
       background: white;
-      margin: 0 auto;
+      margin: 0 auto 5px auto;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
 
     .aqi-value {
-      margin-bottom: 5px;
       background: rgba(0, 0, 0, 0.8);
       color: white;
       padding: 8px 16px;
@@ -670,7 +669,12 @@
       margin-top: 4px;
     }
 
-    
+    @media screen and (max-width: 500px) {
+      .aqi-detail-item {
+        min-width: 120px;
+      }
+    }
+
     @media screen and (max-width: 768px) {
       .weather-grid {
         flex-wrap: wrap;
