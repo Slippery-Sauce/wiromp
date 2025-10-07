@@ -694,6 +694,51 @@
         min-width: 120px;
       }
     }
+
+        /* Loading spinner styling */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: white;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 5px solid rgba(255, 255, 255, 0.1);
+      border-top: 5px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      margin-top: 10px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .loading-dots {
+      display: inline-block;
+      width: 20px;
+      text-align: left;
+    }
+
   </style>
 </head>
 
@@ -918,12 +963,21 @@
     });
 
     // Weather functionality with hourly, daily forecast, and AQI
+        // Weather functionality with hourly, daily forecast, AQI, and loading state
     async function getWeather() {
       const city = document.getElementById("search-input").value.trim();
       if (!city) {
         document.getElementById("result").innerText = "❌ ERROR: Please enter a city name.";
         return;
       }
+
+      // Show loading spinner
+      document.getElementById("result").innerHTML = `
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading weather data<span class="loading-dots">...</span></div>
+        </div>
+      `;
 
       try {
         const currentRes = await fetch(`/weather/${city}`);
@@ -1111,6 +1165,7 @@
         document.getElementById("result").innerText = "❌ ERROR: Failed to fetch weather data.";
       }
     }
+
 
     function getAQIInfo(aqi) {
       const aqiLevels = {
